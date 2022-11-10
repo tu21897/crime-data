@@ -1,0 +1,7 @@
+body {
+    margin: 0;
+}
+
+.leaflet-overlay-pane svg path{
+    pointer-events: auto;
+}
