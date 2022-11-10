@@ -17,6 +17,7 @@ d3.json('mcpp.geojson').then(function(json) {
             const point = map.latLngToLayerPoint(new L.LatLng(y, x))
             this.stream.point(point.x, point.y)
         };
+    let prevData = [], heatLayer;
     let projection = d3.geoTransform({point: projectPoint});
     let geoGenerator = d3.geoPath().projection(projection);
     const overlay = d3.select(map.getPanes().overlayPane);
@@ -44,7 +45,13 @@ d3.json('mcpp.geojson').then(function(json) {
                 const data = await response.json();
                 let heat = d3.group(data, d => d.latitude, d=> d.longitude);
                 let h1 = [...heat.keys()].map(d => [...heat.get(d)].map(dd => [d, dd[0], dd[1].length])).flat();
-                L.heatLayer(h1, {radius: 15}).addTo(map);
+                prevData.push(...h1);
+                if (!heatLayer) {
+                    heatLayer = L.heatLayer(h1, {radius: 15});
+                    heatLayer.addTo(map);
+                } else {
+                    heatLayer.setLatLngs(prevData);
+                }
             }
         });
     const onZoom = () => {path.attr('d', geoGenerator);}
