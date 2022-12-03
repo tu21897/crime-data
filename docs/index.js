@@ -1,120 +1,227 @@
 home = {lat: 47.646197, long:-122.312542, zoom:13};
-let limit = 5000;
-let startYear = 2019;
-let endYear = 2020;
-let countDict = {};
-var map = L.map('map', {
-    zoomControl: false,
-    minZoom: 10
-}).setView([home.lat, home.long], home.zoom);
+let limit = 10000;
+let v1 = document.getElementById('vis');
+let v2 = document.getElementById('vis2');
+let startYear = document.getElementById('syear');
+let endYear = document.getElementById('eyear');
+let cm, cm1, cmm, cmm1, map;
+startYear.addEventListener('change', () => reset());
+endYear.addEventListener('change', () => reset());
+set();
 
-var Stadia_AlidadeSmoothDark = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
-    maxZoom: 20
-}).addTo(map);
-let cm, cm1, cmm, cmm1;
-L.svg({clickable:true}).addTo(map);
+function reset() {
+    v1.innerHTML = '';
+    v2.innerHTML = '';
+    map.remove()
+    set()
+}
 
-d3.json('mcpp.geojson').then(function(json) {
-    const projectPoint = function(x, y) {
-            const point = map.latLngToLayerPoint(new L.LatLng(y, x))
-            this.stream.point(point.x, point.y)
-        };
-    let prevData = [], heatLayer;
-    let projection = d3.geoTransform({point: projectPoint});
-    let geoGenerator = d3.geoPath().projection(projection);
-    const overlay = d3.select(map.getPanes().overlayPane);
-    const svg = overlay.select('svg').attr("pointer-events", "auto"),
-            g = svg.append('g').attr('class', 'leaflet-zoom-hide');
-    const path = g.selectAll('path')
-        .data(json.features)
-        .enter()
-        .append('path')
-        .attr('d', geoGenerator)
-        .attr('fill-opacity', 0.2)
-        .attr('fill', 'steelblue')
-        .attr('stroke', '#fff')
-        .attr('stroke-width', .3)
-        .on("mouseover", function(d){
-            d3.select(this).attr("fill-opacity", 0.3)
-        })
-        .on("mouseout", function(d){
-            d3.select(this).attr("fill-opacity", 0.2)
-        })
-        .on("click", async function(e, d){
-            if (d3.select(this).attr("fill") != 'gray') {
-                d3.select(this).attr("fill", 'gray');
-                const response = await fetch(`https://data.seattle.gov/resource/tazs-3rd5.json?mcpp=${d.properties.NAME}&$where=offense_start_datetime%20%3E=%20%27${document.getElementById('syear').value}-01-01T00:00:00%27%20and%20offense_start_datetime%3C=%27${document.getElementById('eyear').value}-01-01T00:00:00%27&$limit=${limit}`);
-                const data = await response.json();
-                document.getElementById('vis').innerHTML = '';
-                document.getElementById('vis2').innerHTML = '';
-                cm = d3.group(data, d => d.offense);
-                if (!cm1) {
-                    cm1 = [...cm.keys()].map(d => {
-                        let p = new Object();
-                        p.name = d;
-                        p.value = cm.get(d).length;
-                        return p;
-                    });
-                } else {
-                    let tmp = [...cm.keys()].map(d => {
-                        let p = new Object();
-                        p.name = d;
-                        p.value = cm.get(d).length;
-                        return p;
-                    });
-                    for (let i = 0; i < tmp.length; i++) {
-                        if (cm1[i]) cm1[i].value += tmp[i].value;
+function set() {
+    map = L.map('map', {
+        zoomControl: false,
+        minZoom: 10
+    }).setView([home.lat, home.long], home.zoom);
+    L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
+        maxZoom: 20
+    }).addTo(map);
+    L.svg({clickable:true}).addTo(map);
+    d3.json('mcpp.geojson').then(function(json) {
+        const projectPoint = function(x, y) {
+                const point = map.latLngToLayerPoint(new L.LatLng(y, x))
+                this.stream.point(point.x, point.y)
+            };
+        let projection = d3.geoTransform({point: projectPoint});
+        let geoGenerator = d3.geoPath().projection(projection);
+        let prevData = [], heatLayer;
+        const overlay = d3.select(map.getPanes().overlayPane);
+        const svg = overlay.select('svg').attr("pointer-events", "auto"),
+                g = svg.append('g').attr('class', 'leaflet-zoom-hide');
+        const path = g.selectAll('path')
+            .data(json.features)
+            .enter()
+            .append('path')
+            .attr('d', geoGenerator)
+            .attr('fill-opacity', 0.2)
+            .attr('fill', 'steelblue')
+            .attr('stroke', '#fff')
+            .attr('stroke-width', .3)
+            .on("mouseover", function(d){
+                d3.select(this).attr("fill-opacity", 0.3)
+            })
+            .on("mouseout", function(d){
+                d3.select(this).attr("fill-opacity", 0.2)
+            })
+            .on("click", async function(e, d){
+                if (d3.select(this).attr("fill") != 'gray') {
+                    d3.select(this).attr("fill", 'gray');
+                    const response = await fetch(`https://data.seattle.gov/resource/tazs-3rd5.json?mcpp=${d.properties.NAME}&$where=offense_start_datetime%20%3E=%20%27${startYear.value}-01-01T00:00:00%27%20and%20offense_start_datetime%3C=%27${endYear.value}-01-01T00:00:00%27&$limit=${limit}`);
+                    const data = await response.json();
+                    if (data.length >= limit) alert(`Warning: More than limit(${limit}) data points in selection, some data might be hidden.`)
+                    v1.innerHTML = '';
+                    v2.innerHTML = '';
+                    cm = d3.group(data, d => d.offense);
+                    if (!cm1) {
+                        cm1 = [...cm.keys()].map(d => {
+                            let p = new Object();
+                            p.name = d;
+                            p.value = cm.get(d).length;
+                            return p;
+                        });
+                    } else {
+                        let tmp = [...cm.keys()].map(d => {
+                            let p = new Object();
+                            p.name = d;
+                            p.value = cm.get(d).length;
+                            return p;
+                        });
+                        tmp.forEach(o => {
+                            let upd = false;
+                            cm1.every(o2 => {
+                                if (o.name === o2.name) {
+                                    o2.value += o.value;
+                                    upd = true;
+                                    return false;
+                                }
+                                return true;
+                            })
+                            if (!upd) cm1.push(o);
+                        });
+                    }
+                    v1.appendChild(BarChart(cm1, {
+                        x: d => d.value,
+                        y: d => d.name,
+                        yDomain: d3.groupSort(cm1, ([d]) => -d.value, d => d.name),
+                        xLabel: "Frequency →",
+                        width: 600,
+                        color: "steelblue"
+                    }))
+                    cmm = d3.group(data, d => d.crime_against_category);
+                    if (!cmm1) {
+                        cmm1 = [...cmm.keys()].map(d => {
+                            let p = new Object();
+                            p.name = d;
+                            p.value = cmm.get(d).length;
+                            return p;
+                        });
+                    } else {
+                        let tmp = [...cmm.keys()].map(d => {
+                            let p = new Object();
+                            p.name = d;
+                            p.value = cmm.get(d).length;
+                            return p;
+                        });
+                        tmp.forEach(o => {
+                            let upd = false;
+                            cmm1.every(o2 => {
+                                if (o.name === o2.name) {
+                                    o2.value += o.value;
+                                    upd = true;
+                                    return false;
+                                }
+                                return true;
+                            })
+                            if (!upd) cmm1.push(o);
+                        });
+                    }
+                    v2.appendChild(PieChart(cmm1, {
+                        name: d => d.name,
+                        value: d => d.value,
+                        width: 500,
+                        height: 500
+                    }))
+                    let heat = d3.group(data, d => d.latitude, d=> d.longitude);
+                    let h1 = [...heat.keys()].map(d => [...heat.get(d)].map(dd => [d, dd[0], dd[1].length])).flat();
+                    prevData.push(...h1);
+                    if (!heatLayer) {
+                        heatLayer = L.heatLayer(h1, {radius: 10});
+                        heatLayer.addTo(map);
+                    } else {
+                        heatLayer.setLatLngs(prevData);
                     }
                 }
-                document.getElementById('vis').appendChild(BarChart(cm1, {
-                    x: d => d.value,
-                    y: d => d.name,
-                    yDomain: d3.groupSort(cm1, ([d]) => -d.value, d => d.name),
-                    xLabel: "Frequency →",
-                    width: 600,
-                    color: "steelblue"
-                  }))
-                cmm = d3.group(data, d => d.crime_against_category);
-                if (!cmm1) {
-                    cmm1 = [...cmm.keys()].map(d => {
-                        let p = new Object();
-                        p.name = d;
-                        p.value = cmm.get(d).length;
-                        return p;
-                    });
-                } else {
-                    let tmp = [...cmm.keys()].map(d => {
-                        let p = new Object();
-                        p.name = d;
-                        p.value = cmm.get(d).length;
-                        return p;
-                    });
-                    for (let i = 0; i < tmp.length; i++) {
-                        if (cmm1[i]) cmm1[i].value += tmp[i].value;
-                    }
-                }
-                document.getElementById('vis2').appendChild(PieChart(cmm1, {
-                    name: d => d.name,
-                    value: d => d.value,
-                    width: 500,
-                    height: 500
-                }))
-                let heat = d3.group(data, d => d.latitude, d=> d.longitude);
-                let h1 = [...heat.keys()].map(d => [...heat.get(d)].map(dd => [d, dd[0], dd[1].length])).flat();
-                prevData.push(...h1);
-                if (!heatLayer) {
-                    heatLayer = L.heatLayer(h1, {radius: 10});
-                    heatLayer.addTo(map);
-                } else {
-                    heatLayer.setLatLngs(prevData);
-                }
+            });
+        const onZoom = () => {path.attr('d', geoGenerator);}
+        onZoom()
+        map.on('zoomend', onZoom)
+    });
+    // From https://gis.stackexchange.com/questions/127286/home-button-leaflet-map, user:9847
+    L.Control.zoomHome = L.Control.extend({
+        options: {
+            position: 'topright',
+            zoomInText: '+',
+            zoomInTitle: 'Zoom in',
+            zoomOutText: '-',
+            zoomOutTitle: 'Zoom out',
+            zoomHomeText: '<i class="fa fa-home" style="line-height:1.65;"></i>',
+            zoomHomeTitle: 'Zoom home'
+        },
+
+        onAdd: function (map) {
+            var controlName = 'gin-control-zoom',
+                container = L.DomUtil.create('div', controlName + ' leaflet-bar'),
+                options = this.options;
+
+            this._zoomInButton = this._createButton(options.zoomInText, options.zoomInTitle,
+            controlName + '-in', container, this._zoomIn);
+            this._zoomHomeButton = this._createButton(options.zoomHomeText, options.zoomHomeTitle,
+            controlName + '-home', container, this._zoomHome);
+            this._zoomOutButton = this._createButton(options.zoomOutText, options.zoomOutTitle,
+            controlName + '-out', container, this._zoomOut);
+
+            this._updateDisabled();
+            map.on('zoomend zoomlevelschange', this._updateDisabled, this);
+
+            return container;
+        },
+
+        onRemove: function (map) {
+            map.off('zoomend zoomlevelschange', this._updateDisabled, this);
+        },
+
+        _zoomIn: function (e) {
+            this._map.zoomIn(e.shiftKey ? 3 : 1);
+        },
+
+        _zoomOut: function (e) {
+            this._map.zoomOut(e.shiftKey ? 3 : 1);
+        },
+
+        _zoomHome: function (e) {
+            map.setView([home.lat, home.long], home.zoom);
+        },
+
+        _createButton: function (html, title, className, container, fn) {
+            var link = L.DomUtil.create('a', className, container);
+            link.innerHTML = html;
+            link.href = '#';
+            link.title = title;
+
+            L.DomEvent.on(link, 'mousedown dblclick', L.DomEvent.stopPropagation)
+                .on(link, 'click', L.DomEvent.stop)
+                .on(link, 'click', fn, this)
+                .on(link, 'click', this._refocusOnMap, this);
+
+            return link;
+        },
+
+        _updateDisabled: function () {
+            var map = this._map,
+                className = 'leaflet-disabled';
+
+            L.DomUtil.removeClass(this._zoomInButton, className);
+            L.DomUtil.removeClass(this._zoomOutButton, className);
+
+            if (map._zoom === map.getMinZoom()) {
+                L.DomUtil.addClass(this._zoomOutButton, className);
             }
-        });
-    const onZoom = () => {path.attr('d', geoGenerator);}
-    onZoom()
-    map.on('zoomend', onZoom)
-});
-
+            if (map._zoom === map.getMaxZoom()) {
+                L.DomUtil.addClass(this._zoomInButton, className);
+            }
+        }
+    });
+    var zoomHome = new L.Control.zoomHome();
+    zoomHome.addTo(map);
+}
 
 // Copyright 2021 Observable, Inc.
 // Released under the ISC license.
@@ -319,81 +426,3 @@ function PieChart(data, {
   
     return Object.assign(svg.node(), {scales: {color}});
   }
-
-// From https://gis.stackexchange.com/questions/127286/home-button-leaflet-map, user:9847
-L.Control.zoomHome = L.Control.extend({
-    options: {
-        position: 'topright',
-        zoomInText: '+',
-        zoomInTitle: 'Zoom in',
-        zoomOutText: '-',
-        zoomOutTitle: 'Zoom out',
-        zoomHomeText: '<i class="fa fa-home" style="line-height:1.65;"></i>',
-        zoomHomeTitle: 'Zoom home'
-    },
-
-    onAdd: function (map) {
-        var controlName = 'gin-control-zoom',
-            container = L.DomUtil.create('div', controlName + ' leaflet-bar'),
-            options = this.options;
-
-        this._zoomInButton = this._createButton(options.zoomInText, options.zoomInTitle,
-        controlName + '-in', container, this._zoomIn);
-        this._zoomHomeButton = this._createButton(options.zoomHomeText, options.zoomHomeTitle,
-        controlName + '-home', container, this._zoomHome);
-        this._zoomOutButton = this._createButton(options.zoomOutText, options.zoomOutTitle,
-        controlName + '-out', container, this._zoomOut);
-
-        this._updateDisabled();
-        map.on('zoomend zoomlevelschange', this._updateDisabled, this);
-
-        return container;
-    },
-
-    onRemove: function (map) {
-        map.off('zoomend zoomlevelschange', this._updateDisabled, this);
-    },
-
-    _zoomIn: function (e) {
-        this._map.zoomIn(e.shiftKey ? 3 : 1);
-    },
-
-    _zoomOut: function (e) {
-        this._map.zoomOut(e.shiftKey ? 3 : 1);
-    },
-
-    _zoomHome: function (e) {
-        map.setView([home.lat, home.long], home.zoom);
-    },
-
-    _createButton: function (html, title, className, container, fn) {
-        var link = L.DomUtil.create('a', className, container);
-        link.innerHTML = html;
-        link.href = '#';
-        link.title = title;
-
-        L.DomEvent.on(link, 'mousedown dblclick', L.DomEvent.stopPropagation)
-            .on(link, 'click', L.DomEvent.stop)
-            .on(link, 'click', fn, this)
-            .on(link, 'click', this._refocusOnMap, this);
-
-        return link;
-    },
-
-    _updateDisabled: function () {
-        var map = this._map,
-            className = 'leaflet-disabled';
-
-        L.DomUtil.removeClass(this._zoomInButton, className);
-        L.DomUtil.removeClass(this._zoomOutButton, className);
-
-        if (map._zoom === map.getMinZoom()) {
-            L.DomUtil.addClass(this._zoomOutButton, className);
-        }
-        if (map._zoom === map.getMaxZoom()) {
-            L.DomUtil.addClass(this._zoomInButton, className);
-        }
-    }
-});
-var zoomHome = new L.Control.zoomHome();
-zoomHome.addTo(map);

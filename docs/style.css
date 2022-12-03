@@ -43,7 +43,7 @@ body {
 .anno {
     top: 0;
     z-index: 99;
-    left: 0px;
+    left: -620px;
     position: fixed;
     transition: transform 900ms cubic-bezier(.05, .4, .25, .95);
 }
