@@ -1,5 +1,7 @@
 home = {lat: 47.646197, long:-122.312542, zoom:13};
 let limit = 5000;
+let startYear = 2019;
+let endYear = 2020;
 let countDict = {};
 var map = L.map('map', {
     zoomControl: false,
@@ -41,7 +43,7 @@ d3.json('mcpp.geojson').then(function(json) {
         .on("click", async function(e, d){
             if (d3.select(this).attr("fill") != 'gray') {
                 d3.select(this).attr("fill", 'gray');
-                const response = await fetch(`https://data.seattle.gov/resource/tazs-3rd5.json?mcpp=${d.properties.NAME}&$where=offense_start_datetime%20%3E=%20%272019-01-01T00:00:00%27&$limit=${limit}`);
+                const response = await fetch(`https://data.seattle.gov/resource/tazs-3rd5.json?mcpp=${d.properties.NAME}&$where=offense_start_datetime%20%3E=%20%27${document.getElementById('syear').value}-01-01T00:00:00%27%20and%20offense_start_datetime%3C=%27${document.getElementById('eyear').value}-01-01T00:00:00%27&$limit=${limit}`);
                 const data = await response.json();
                 document.getElementById('vis').innerHTML = '';
                 document.getElementById('vis2').innerHTML = '';
@@ -122,7 +124,7 @@ function BarChart(data, {
     y = (d, i) => i, // given d in data, returns the (ordinal) y-value
     title, // given d in data, returns the title text
     marginTop = 30, // the top margin, in pixels
-    marginRight = 0, // the right margin, in pixels
+    marginRight = 20, // the right margin, in pixels
     marginBottom = 10, // the bottom margin, in pixels
     marginLeft = 220, // the left margin, in pixels
     width = 640, // the outer width of the chart, in pixels
