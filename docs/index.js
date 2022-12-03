@@ -4,7 +4,7 @@ let v1 = document.getElementById('vis');
 let v2 = document.getElementById('vis2');
 let startYear = document.getElementById('syear');
 let endYear = document.getElementById('eyear');
-let cm, cm1, cmm, cmm1, map;
+let map;
 startYear.addEventListener('change', () => reset());
 endYear.addEventListener('change', () => reset());
 set();
@@ -12,11 +12,12 @@ set();
 function reset() {
     v1.innerHTML = '';
     v2.innerHTML = '';
-    map.remove()
-    set()
+    map.remove();
+    set();
 }
 
 function set() {
+    let cm, cm1, cmm, cmm1;
     map = L.map('map', {
         zoomControl: false,
         minZoom: 10
