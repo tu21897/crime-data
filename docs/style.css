@@ -1,7 +1,46 @@
 body {
     margin: 0;
+    font-family: sans-serif;
 }
 
 .leaflet-overlay-pane svg path{
     pointer-events: auto;
+}
+
+.anno-tray {
+    width: 620px;
+    overflow-y: auto;
+    height: 100vh;
+    background-color: rgb(99, 99, 99);
+    opacity: 80%;
+}
+
+#vis, #vis2 {
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.anno-button {
+    top: calc(50vh - 15px);
+    left: 560px;
+    width: 150px;
+    position: absolute;
+    text-align: center;
+    text-anchor: middle;
+    transform: rotate(90deg);
+    height: 30px;
+    background-color: rgb(99, 99, 99);
+    border-radius: 5px 5px 0px 0px;
+    opacity: 80%;
+}
+
+.anno {
+    top: 0;
+    z-index: 99;
+    left: -620px;
+    position: fixed;
+    transition: transform 900ms cubic-bezier(.05, .4, .25, .95);
 }

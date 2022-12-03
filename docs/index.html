@@ -15,6 +15,29 @@
     </head>
     <body>
       <div id="map" style="height:100vh;"></div>
+      <div class='anno' style="z-index:9999;">
+        <div class='anno-tray'>
+          <h2 style="text-align:center;margin-bottom:0;">Frequency of Specific Crimes</h2>
+          <h6 style="text-align:center;margin:0;">(Select Area)</h6>
+          <div id="vis"></div>
+          <h2 style="text-align:center;margin-bottom:0;">Victim Group Breakdown</h2>
+          <h6 style="text-align:center;margin:0;">(Select Area)</h6>
+          <div id="vis2"></div>
+        </div>
+        <div class='anno-button' onclick="openTab()">Details</div>
+    </div>
       <script src="index.js" async defer></script>
+      <script>
+        function openTab(){
+          let annotation = document.querySelector('.anno');
+          if (!annotation.open) {
+              annotation.open = true;
+              annotation.style.transform = 'translate(620px, 0)';
+          } else {
+              annotation.open = false;
+              annotation.style.transform = 'translate(0, 0)';
+        }
+    }
+      </script>
     </body>
 </html>
