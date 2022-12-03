@@ -9,7 +9,7 @@ var map = L.map('map', {
 var Stadia_AlidadeSmoothDark = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
     maxZoom: 20
 }).addTo(map);
-let cm1;
+let cm, cm1, cmm, cmm1;
 L.svg({clickable:true}).addTo(map);
 
 d3.json('mcpp.geojson').then(function(json) {
@@ -43,17 +43,27 @@ d3.json('mcpp.geojson').then(function(json) {
                 d3.select(this).attr("fill", 'gray');
                 const response = await fetch(`https://data.seattle.gov/resource/tazs-3rd5.json?mcpp=${d.properties.NAME}&$where=offense_start_datetime%20%3E=%20%272019-01-01T00:00:00%27&$limit=${limit}`);
                 const data = await response.json();
-                console.log(data);
-                console.log(d3.group(data, d => d.offense));
-                console.log(d3.group(data, d => d.crime_against_category));
-                console.log(d3.group(data, d => d.offense_parent_group));
-                let cm = d3.group(data, d => d.offense);
-                cm1 = [...cm.keys()].map(d => {
-                    let p = new Object();
-                    p.name = d;
-                    p.value = cm.get(d).length;
-                    return p;
-                });
+                document.getElementById('vis').innerHTML = '';
+                document.getElementById('vis2').innerHTML = '';
+                cm = d3.group(data, d => d.offense);
+                if (!cm1) {
+                    cm1 = [...cm.keys()].map(d => {
+                        let p = new Object();
+                        p.name = d;
+                        p.value = cm.get(d).length;
+                        return p;
+                    });
+                } else {
+                    let tmp = [...cm.keys()].map(d => {
+                        let p = new Object();
+                        p.name = d;
+                        p.value = cm.get(d).length;
+                        return p;
+                    });
+                    for (let i = 0; i < tmp.length; i++) {
+                        if (cm1[i]) cm1[i].value += tmp[i].value;
+                    }
+                }
                 document.getElementById('vis').appendChild(BarChart(cm1, {
                     x: d => d.value,
                     y: d => d.name,
@@ -62,14 +72,26 @@ d3.json('mcpp.geojson').then(function(json) {
                     width: 600,
                     color: "steelblue"
                   }))
-                cm = d3.group(data, d => d.crime_against_category);
-                cm1 = [...cm.keys()].map(d => {
-                    let p = new Object();
-                    p.name = d;
-                    p.value = cm.get(d).length;
-                    return p;
-                });
-                document.getElementById('vis2').appendChild(PieChart(cm1, {
+                cmm = d3.group(data, d => d.crime_against_category);
+                if (!cmm1) {
+                    cmm1 = [...cmm.keys()].map(d => {
+                        let p = new Object();
+                        p.name = d;
+                        p.value = cmm.get(d).length;
+                        return p;
+                    });
+                } else {
+                    let tmp = [...cmm.keys()].map(d => {
+                        let p = new Object();
+                        p.name = d;
+                        p.value = cmm.get(d).length;
+                        return p;
+                    });
+                    for (let i = 0; i < tmp.length; i++) {
+                        if (cmm1[i]) cmm1[i].value += tmp[i].value;
+                    }
+                }
+                document.getElementById('vis2').appendChild(PieChart(cmm1, {
                     name: d => d.name,
                     value: d => d.value,
                     width: 500,

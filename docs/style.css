@@ -11,8 +11,8 @@ body {
     width: 620px;
     overflow-y: auto;
     height: 100vh;
-    background-color: rgb(99, 99, 99);
-    opacity: 80%;
+    background-color: whitesmoke;
+    opacity: 90%;
 }
 
 #vis, #vis2 {
@@ -32,9 +32,12 @@ body {
     text-anchor: middle;
     transform: rotate(90deg);
     height: 30px;
-    background-color: rgb(99, 99, 99);
+    background-color: whitesmoke;
     border-radius: 5px 5px 0px 0px;
-    opacity: 80%;
+    opacity: 90%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .anno {
