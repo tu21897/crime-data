@@ -154,7 +154,9 @@ function set() {
             zoomOutText: '-',
             zoomOutTitle: 'Zoom out',
             zoomHomeText: '<i class="fa fa-home" style="line-height:1.65;"></i>',
-            zoomHomeTitle: 'Zoom home'
+            zoomHomeTitle: 'Zoom home',
+            resetText: '<i class="fa fa-eraser" style="line-height:1.65;"></i>',
+            resetTitle: 'Reset map'
         },
 
         onAdd: function (map) {
@@ -168,6 +170,8 @@ function set() {
             controlName + '-home', container, this._zoomHome);
             this._zoomOutButton = this._createButton(options.zoomOutText, options.zoomOutTitle,
             controlName + '-out', container, this._zoomOut);
+            this._reset = this._createButton(options.resetText, options.resetTitle,
+                controlName + '-reset', container, this._reset);
 
             this._updateDisabled();
             map.on('zoomend zoomlevelschange', this._updateDisabled, this);
@@ -185,6 +189,10 @@ function set() {
 
         _zoomOut: function (e) {
             this._map.zoomOut(e.shiftKey ? 3 : 1);
+        },
+
+        _reset: function (e) {
+            reset();
         },
 
         _zoomHome: function (e) {
