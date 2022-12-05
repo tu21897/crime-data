@@ -17,17 +17,17 @@
       <div id="map" style="height:100vh;"></div>
       <div class='anno' style="z-index:9999;">
         <div class='anno-tray'>
-          <h2 style="text-align:center;margin-bottom:0;">Frequency of Specific Crimes</h2>
-          <h6 style="text-align:center;margin:0;">(Select Area)</h6>
-          <div>
-            <p style="text-align:center;"><input type="number" id="syear" name="syear" min="1950" max="2023" value="2019"> to <input type="number" id="eyear" name="eyear" min="1950" max="2023" value="2020"></p>
+          <div class="backg">
+            <h2>Frequency of Specific Crimes</h2>
+            <h6>(Select Area)</h6>
+            <p><input type="number" id="syear" name="syear" min="1950" max="2023" value="2019"> to <input type="number" id="eyear" name="eyear" min="1950" max="2023" value="2020"></p>
+            <div id="vis"></div>
+            <h2>Victim Group Breakdown</h2>
+            <h6>(Select Area)</h6>
+            <div id="vis2"></div>
           </div>
-          <div id="vis"></div>
-          <h2 style="text-align:center;margin-bottom:0;">Victim Group Breakdown</h2>
-          <h6 style="text-align:center;margin:0;">(Select Area)</h6>
-          <div id="vis2"></div>
         </div>
-        <div class='anno-button' onclick="openTab()"><p style="margin:0;">Details</p></div>
+        <div class='anno-button' onclick="openTab()"><p style="margin:0;color:white;">Details</p></div>
     </div>
       <script src="index.js" async defer></script>
       <script>
@@ -35,7 +35,7 @@
           let annotation = document.querySelector('.anno');
           if (!annotation.open) {
               annotation.open = true;
-              annotation.style.transform = 'translate(620px, 0)';
+              annotation.style.transform = 'translate(min(620px, calc(75vw + 48px)), 0)';
           } else {
               annotation.open = false;
               annotation.style.transform = 'translate(0, 0)';

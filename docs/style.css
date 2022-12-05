@@ -8,42 +8,61 @@ body {
 }
 
 .anno-tray {
-    width: 620px;
+    width: min(572px, 75vw);
     overflow-y: auto;
-    height: 100vh;
-    background-color: whitesmoke;
-    opacity: 90%;
+    height: calc(100vh - 48px);
+    background-color: rgb(30, 30, 30, 0.7);
+    padding: 24px;
+}
+
+.backg {
+    text-align: center;
+    background-color: rgb(245, 245, 245, 0.8);
+    border-radius: 5px;
+    border: 0.5px solid black;
+}
+
+.backg > p, .backg > h2 {
+    margin: 0;
+    padding: 8px;
+}
+
+.backg > h6 {
+    margin: 0;
 }
 
 #vis, #vis2 {
-    padding: 10px;
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    padding: 8px;
 }
 
 .anno-button {
-    top: calc(50vh - 15px);
-    left: 560px;
-    width: 150px;
+    top: calc(50vh - 12px);
+    left: min(572px, 75vw);
+    width: 120px;
     position: absolute;
     text-align: center;
     text-anchor: middle;
     transform: rotate(90deg);
-    height: 30px;
-    background-color: whitesmoke;
+    height: 24px;
+    background-color: rgb(30, 30, 30, 0.7);
     border-radius: 5px 5px 0px 0px;
-    opacity: 90%;
     display: flex;
     justify-content: center;
     align-items: center;
+    cursor: pointer;
+    border: 0.5px solid white;
+    border-bottom: 0.5px solid rgb(30, 30, 30, 0.8);
 }
 
 .anno {
     top: 0;
     z-index: 99;
-    left: -620px;
+    left: max(-620px, calc(-75vw - 48px));
     position: fixed;
     transition: transform 900ms cubic-bezier(.05, .4, .25, .95);
+    border-right: 0.5px solid white;
 }
